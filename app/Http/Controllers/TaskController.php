@@ -11,10 +11,10 @@ class TaskController extends Controller
      * Afficher toutes les tâches
      */
     public function index()
-    {
-        $tasks = Task::latest()->get(); // mieux que all()
-        return view('tasks.index', compact('tasks'));
-    }
+{
+    $tasks = auth()->user()->tasks()->latest()->get();
+    return view('tasks.index', compact('tasks'));
+}
 
     /**
      * Formulaire création tâche
@@ -28,17 +28,16 @@ class TaskController extends Controller
      * Enregistrer une tâche
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'title' => 'required|min:3'
-        ]);
+{
+    $request->validate([
+        'title' => 'required|min:3|max:255',
+        'description' => 'nullable|max:1000',
+    ]);
 
-        Task::create([
-            'title' => $request->title
-        ]);
+    auth()->user()->tasks()->create($request->only(['title', 'description']));
 
-        return redirect()->route('tasks.index');
-    }
+    return redirect()->route('tasks.index')->with('success', 'Tâche créée !');
+}
 
     /**
      * Afficher une tâche
